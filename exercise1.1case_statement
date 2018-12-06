@@ -1,0 +1,90 @@
+#!/bin/bash
+##Excercise 1
+
+## a. List all the files in /var/log which end in '.log'
+
+#ls -a list all the files - does not ignore entries starting with '.'
+#*.log makes use of the wildcard feature '*'
+# | (piping) takes the input from the previous command and uses it as the input for the next
+# xargs is used to build and execute commands from standard input, -n 1 sets the max arguements, basename removes the directory path from displaying
+
+Opt1="1 - List all files in /var/log ending in '.log'"
+Opt2="2 - List Directories in var/log"
+Opt3="3 - List all files in var/log which don't end in '.log' "
+Opt4="4 - Lines from /var/log/messages which mention 'syslog'"
+Opt5="5 - List of usernames who tried to login"
+
+clear
+title="=== /var/log options ==="
+echo "$title"
+echo "Please make a choice (1-5) to continue..."
+echo "$Opt1"
+echo "$Opt2"
+echo "$Opt3"
+echo "$Opt4"
+echo "$Opt5"
+
+echo "Press Ctrl+C to quit"
+read DATA 
+case $DATA in
+
+		1)
+		echo "$Opt1:"
+		ls -a /var/log/*.log | xargs -n 1 basename
+		read -n 1 -s -r -p "Press any key to continue"
+		exec bash ~/bash/tasks-month2/exercise1.1
+		;;
+
+## b. List just the directories in /var/log/
+
+#This command will list all the directories within the specifed directory along with their full path, again utilising the wildcard feature, it is the '*/' that dictates that it is a directory
+#ls -d /var/log/*/ (commented out to clean up output)
+#This is as noted above, using piping with xarg -n 1 basename to show the directory names only, without the full path
+
+		2)
+		echo "$Opt2:"
+		ls -d /var/log/*/ | xargs -n 1 basename
+		read -n 1 -s -r -p "Press any key to continue"
+                exec bash ~/bash/tasks-month2/exercise1.1
+		;;
+
+## c. List all the files which don't end in '.log'
+
+#The below lists all the files in /var/log/ with the -p placing any directory to show a '/' at the end, then the -I is used to exclude andything ending with '.log' also using the wildcard feature. This is then piped into the command 'grep -v /' which removes anything with a '/' from the data/list.
+
+		3)
+		echo "$Opt3:"
+		ls -p /var/log -I "*.log" | grep -v /
+		read -n 1 -s -r -p "Press any key to continue"
+                exec bash ~/bash/tasks-month2/exercise1.1
+		;;
+
+## d. List just the lines from the '/var/log/messages' mentioning 'syslog'
+
+# grep "syslog" and the path to the file to be searched, this searches only for the specified word in the text and prints out only that line
+
+		4)
+		echo "$Opt4:"
+		sudo grep "syslog" /var/log/messages
+		read -n 1 -s -r -p "Press any key to continue"
+		exec bash ~/bash/tasks-month2/exercise1.1
+		;;
+
+## e. From log files such as 'secure' or 'auth' extract a list of the usernames (just the usernames) which have attempted to authenticate, de-duplicate them (so the list should only of be unique names) and sort them into alphabetical order.
+
+		5)
+		echo "$Opt5:"
+		sudo grep "input_userauth_request" /var/log/secure | awk '{print $9}' | sort -u | less
+		read -n 1 -s -r -p "Press any key to continue"
+		exec bash ~/bash/tasks-month2/exercise1.1
+		;;
+
+		*)
+		echo "%%%---+++xxx ERROR xxx+++---%%%"
+		echo "Please enter only a value between 1 - 5:"
+		echo "or use CTRL+C to exit"
+                read -n 1 -s -r -p "Press any key to continue"
+                exec bash ~/bash/tasks-month2/exercise1.1
+		;;
+
+esac

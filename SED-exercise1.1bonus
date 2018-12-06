@@ -1,0 +1,95 @@
+#!/bin/bash
+##Excercise 1
+
+##THIS IS NOW DONE USING AWK COMMANDS INSTEAD OF GREP AND XARGS
+
+Opt1="1 - List all files in /var/log ending in '.log'"
+Opt2="2 - List Directories in var/log"
+Opt3="3 - List all files in var/log which don't end in '.log' "
+Opt4="4 - Lines from /var/log/messages which mention 'syslog'"
+Opt5="5 - List of usernames who tried to login"
+
+clear
+title="=== /var/log options ==="
+echo "$title"
+echo "Please make a choice (1-5) to continue..."
+echo "$Opt1"
+echo "$Opt2"
+echo "$Opt3"
+echo "$Opt4"
+echo "$Opt5"
+
+echo "Press Ctrl+C to quit"
+read Choice
+
+## a. List all the files in /var/log which end in '.log'
+#'ls -a' lists all the files and does not ignore entries starting with '.'
+#'*.log' makes use of the wildcard feature '*' to list any file ending in '.log'
+# | (piping) takes the input from the previous command and uses it as the input for the next
+# sed 's/.*\///' - to break this down into pieces, s means to subsitute, the 1st and last / is the opening and closing of the of the pattern to subsitute, there is also a / in the middle however this is a little confusing given that I am also using / as the defined pattern to subsitute (\/ - where the \ takes away the special characteristics of the following /). In essence to make this more readable I have also given an example below of it being written using = instead of / as the opening, closing and middle defining characters
+#easier to read example - ls -a /var/log/*.log | sed 's=.*\/=='
+# s - subsitute, . - means any character, * - means any number of characters, \/ - defines part of the patern (when coupled with .* means any characters before and including / is to be subsituted, then the // at the end is what it is to be subsituted with, in this case nothing, however for example if I wanted the path to be replaced by 'ABC' then it would look like either sed 's/.*\//ABC/' or a more readable version of sed 's=.*\/=ABC='
+if [ "$Choice" = 1 ]
+then
+		echo "$Opt1:"
+		ls -a /var/log/*.log | sed 's/.*\///' #or sed 's=.*\/=='
+		read -n 1 -s -r -p "Press any key to continue"
+		exec bash ~/bash/tasks-month2/exercise1.1
+
+## b. List just the directories in /var/log/
+#'ls -d /var/log/*/ This command will list all the directories within the specifed directory along with their full path, again utilising the wildcard feature, it is the '*/' that dictates that it is a directory
+# | (piping) takes the input from the previous command and uses it as the input for the next
+# sed is used to execute its commands from standard input from the piped in data
+#easier to read example ls -d /var/log/*/ | sed 's/\/var\/log\///;s/.$//'
+# This is pretty much the same as seen in the above 'tasks a', however I have added on a 2nd pattern to serach and replace by expanding the quotes and also adding a ; to separate the two, otherwise the same format. The difference here in the 2nd pattern is we are looking to remove the '/' at the end of the piped in data (the data is a list of directories and it comes with a '/' at the end. So the '.' indicates to remove anycharacter and coupled with '$' meaning the last character.
+elif [ "$Choice" = 2 ]
+then
+		echo "$Opt2:"
+		ls -d /var/log/*/ | sed 's/\/var\/log\///;s/.$//'
+		read -n 1 -s -r -p "Press any key to continue"
+                exec bash ~/bash/tasks-month2/exercise1.1
+
+## c. List all the files which don't end in '.log'
+#'ls -p /var/log -I"*.log"' lists all the files in /var/log/ with the -p placing any directory to show a '/' at the end, then the -I is used to exclude andything ending with '.log' also using the wildcard feature. 
+# From the ls portion this exludes all the files ending in .log, but not the directories.  "sed 's/.*\///" just as in 'task a' removes everything from the output before and including '/'. However this leaves the output with gaps in the list due to the removal, so just like 'task b' I have also used a 2nd pattern for sed to search and subsitute (albeit subsitute it with nothing thus removing it) as explained below:
+# /^$/d - so to break this down...'d' is the sed command to delete a line. '^$' is a regular expression matching only a blank line, a line start followed by a line end.
+elif [ "$Choice" = 3 ]
+then		echo "$Opt3:"
+		ls -p /var/log -I "*.log" | sed 's/.*\///;/^$/d'
+		read -n 1 -s -r -p "Press any key to continue"
+                exec bash ~/bash/tasks-month2/exercise1.1
+
+## d. List just the lines from the '/var/log/messages' mentioning 'syslog'
+# As I am looking to print the full line of the lines mentioning 'syslog', again we can leave the '{print $x}' out
+# 'sort -u' sorts this data uniquely and in alphabetical order
+# 'less' gives the full list which you can scroll down through, without this it would only show a certain amount of data as the standard output...less is more
+# '-n' disables the automatic printing, coupled along with the 'p' command this ensures only the lines I want printed via '/syslog/p' get printed. Without the '-n' everything gets printed followed by the '/syslog/p' geting printed a 2nd time
+elif [ "$Choice" = 4 ]
+then
+		echo "$Opt4:"
+		sudo sed -n '/syslog/p' /var/log/messages
+		read -n 1 -s -r -p "Press any key to continue"
+		exec bash ~/bash/tasks-month2/exercise1.1
+
+## e. From log files such as 'secure' or 'auth' extract a list of the usernames (just the usernames) which have attempted to authenticate, de-duplicate them (so the list should only of be unique names) and sort them into alphabetical order.
+# sed -n '/input_userauth_request/p' does as stated above, '-n' disables automatic printing, 'p' prints the selected lines from the search criteria
+# sed 's/.* .* .* .* .* .* .* .* \(.* \).*/\1/' - after taking the previous input, this command matches the pattern of the input, and in this case selects column 9 of the data by using the parentheses (which is the data that I want to capture)...the \1 indicates to print the first selection (if I had more than 1 set of parentheses then this may need changed to select both, not sure on that).
+# as this data is in the /var/log/secure file, it is noting the commands entered, so I was getting an extra entry due to this as its essentially adding in my first command, so if this command is ran multiple times, then it picks up on the previous search criteria which just so happens to be the 9th column which my pattern match and sellect finds. To get around this I have piped the data into "sed '/input_userauth/d'" in order to remove it from the output. 
+#'{print $9}' only prints the 9th column as this is where the usernames are located which is all that we are looking for.
+# 'sort -u' sorts this data uniquely and in alphabetical order
+# 'less' gives the full list which you can scroll down through, without this it would only show a certain amount of data as the standard output...less is more
+
+elif [ "$Choice" = 5 ]
+then		echo "$Opt5:"
+		sudo sed -n '/input_userauth_request/p' /var/log/secure | sed 's/.* .* .* .* .* .* .* .* \(.* \).*/\1/' | sed '/input_userauth/d' | sort -u | less
+		read -n 1 -s -r -p "Press any key to continue"
+		exec bash ~/bash/tasks-month2/exercise1.1
+
+else            echo "%%%---+++xxx ERROR xxx+++---%%%"
+		echo "Please enter only a value between 1 - 5:"
+                read -n 1 -s -r -p "Press any key to continue"
+                exec bash ~/bash/tasks-month2/exercise1.1
+
+
+fi
+
