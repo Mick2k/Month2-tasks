@@ -34,9 +34,9 @@ case $Choice in
 		1)
 		echo "$Opt1:"
 		
-		echo *.log /var/log/ | awk -F/ '{print $4}' 
+		ls -a /var/log/*.log | awk -F/ '{print $4}' 
 		read -n 1 -s -r -p "Press any key to continue"
-		exec bash ~/bash/tasks-month2/exercise1.1
+		exec bash /home/centos/bash/tasks-month2/Month2-tasks-git/AWK-exercise1.1bonus
 		;;
 
 ## b. List just the directories in /var/log/
@@ -47,9 +47,9 @@ case $Choice in
 
 		2)
 		echo "$Opt2:"
-		echo /var/log/*/ | awk -F/ '{print $4}'
+		ls -d /var/log/*/ | awk -F/ '{print $4}'
 		read -n 1 -s -r -p "Press any key to continue"
-                exec bash ~/bash/tasks-month2/exercise1.1
+                exec bash /home/centos/bash/tasks-month2/Month2-tasks-git/AWK-exercise1.1bonus
 		;;
 
 ## c. List all the files which don't end in '.log'
@@ -59,9 +59,9 @@ case $Choice in
 
 		3)
 		echo "$Opt3:"
-		echo * /var/log # | awk '!/\//' 
+		ls -p /var/log -I "*.log" | awk '!/\//' 
 		read -n 1 -s -r -p "Press any key to continue"
-                exec bash ~/bash/tasks-month2/exercise1.1
+                exec bash /home/centos/bash/tasks-month2/Month2-tasks-git/AWK-exercise1.1bonus
 		;;
 
 ## d. List just the lines from the '/var/log/messages' mentioning 'syslog'
@@ -74,7 +74,7 @@ case $Choice in
 		echo "$Opt4:"
 		sudo awk '/syslog/' /var/log/messages
 		read -n 1 -s -r -p "Press any key to continue"
-		exec bash ~/bash/tasks-month2/exercise1.1
+		exec bash /home/centos/bash/tasks-month2/Month2-tasks-git/AWK-exercise1.1bonus
 		;;
 
 ## e. From log files such as 'secure' or 'auth' extract a list of the usernames (just the usernames) which have attempted to authenticate, de-duplicate them (so the list should only of be unique names) and sort them into alphabetical order.
@@ -87,14 +87,14 @@ case $Choice in
 		echo "$Opt5:"
 		sudo awk '/input_userauth_request/{print $9}' /var/log/secure | sort -u | less
 		read -n 1 -s -r -p "Press any key to continue"
-		exec bash ~/bash/tasks-month2/exercise1.1
+		exec bash /home/centos/bash/tasks-month2/Month2-tasks-git/AWK-exercise1.1bonus
 		;;
 
 		*)
 		echo "%%%---+++xxx ERROR xxx+++---%%%"
 		echo "Please enter only a value between 1 - 5:"
                 read -n 1 -s -r -p "Press any key to continue"
-                exec bash ~/bash/tasks-month2/exercise1.1
+                exec bash /home/centos/bash/tasks-month2/Month2-tasks-git/AWK-exercise1.1bonus
 
 esac
 
