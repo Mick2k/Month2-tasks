@@ -1,0 +1,14 @@
+#!/bin/bash
+
+
+#While statement in order to read the incoming log and create a variable from it
+while read LOG; do
+
+#Cleanest solution I could find in order to display just the User agent - this cuts every delimiter (delimiter is set as a space here) upto the 17th delimiter and prints what is left and is set as a variable - this will be called later.
+USER="$( echo $LOG | cut -d' ' -f17-)"
+
+#echos the log variable again, pipes this into awk to print the required fields followed by a newline
+#Piped into a sed command to subsitute "-" within the Server IP field with ".", removes the prefixed "ip." from the Server IP field, Subsitutes the "Users agent:" for Users agent followed by the USER variable noted above.  Final part of sed is to remove any double quotations globally before ammending the output file.
+echo $LOG | sudo awk '{print "Date + Time: " $8 "\n" "Server IP: " $4 "\n" "Source IP: " $5 "\n" "Client id: " $7 "\n" "HTTP method used: " $10 "\n" "Requested resource path: " $11 "\n" "HTTP protocol: " $12 "\n" "Sataus code sent: " $13 "\n" "Size of object requested: " $14 "\n" "Users agent:"  "\n"}' | sudo sed "s/\]//g;/Server IP/s/-/\./g;/Server IP:/s/ip.//g;s/\[//g;s=Users agent:*=Users agent: $USER=g;s/\"//g" >> /home/centos/bash/tasks-month2/temp-logs/exercise3_output
+
+done
