@@ -51,7 +51,7 @@ else:
 #connects to MySQL database
 db = mysql.connector.connect(
     user="root",
-    password="abc123", #removed cleartext password before uploading to GitHub.
+    password="******", #removed cleartext password before uploading to GitHub.
     database="Syslog_Data"
 )
 
